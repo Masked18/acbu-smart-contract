@@ -128,7 +128,7 @@ jobs:
         run: bash scripts/verify_wasm_hash.sh
 
       - name: Build contracts
-        run: cargo build --workspace --target wasm32-unknown-unknown --release
+        run: cargo build --target wasm32-unknown-unknown --release
 
       - name: Check Contract Budget
         run: ./scripts/check_budget.sh
