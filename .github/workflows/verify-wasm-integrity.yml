@@ -22,6 +22,7 @@ on:
       - 'scripts/check_budget.sh'
       - 'rust-toolchain.toml'
       - '**/Cargo.toml'
+      - '.github/workflows/verify-wasm-integrity.yml'
 
 jobs:
   verify-wasm-hash:
@@ -104,29 +105,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        # dtolnay/rust-toolchain replaces the deprecated actions-rs/toolchain@v1 (fixes #637)
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.88.0
           targets: wasm32-unknown-unknown
 
       - name: Cache cargo registry
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.toml', 'rust-toolchain.toml') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.toml', 'rust-toolchain.toml') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.toml', 'rust-toolchain.toml') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.toml', 'rust-toolchain.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
 
       - name: Fetch token WASM artifact
         run: bash scripts/fetch_token_wasm.sh
@@ -155,7 +148,7 @@ jobs:
           done
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts
           path: target/wasm32-unknown-unknown/release/*.wasm
@@ -174,14 +167,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        # dtolnay/rust-toolchain replaces the deprecated actions-rs/toolchain@v1 (fixes #637)
-        uses: dtolnay/rust-toolchain@v1
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.88.0
           targets: wasm32-unknown-unknown
 
       - name: Restore cargo cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
